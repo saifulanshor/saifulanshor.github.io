@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TikTok Callback · Faceless Upload</title>
+<meta name="description" content="OAuth callback page for Faceless Upload (TikTok Login Kit).">
+<link rel="stylesheet" href="style.css">
+<style>
+  .box { border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin: 1.5rem 0; }
+  .box.ok { border-color: #16a34a; }
+  .box.err { border-color: #dc2626; }
+  .code { display: block; word-break: break-all; background: var(--line); padding: 10px 12px; border-radius: 8px; font-family: ui-monospace, monospace; font-size: .85rem; margin: .5rem 0; }
+  button { font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--accent); color: #fff; cursor: pointer; margin: .25rem .5rem .25rem 0; }
+  button.secondary { background: transparent; color: var(--ink); }
+</style>
+</head>
+<body>
+<main>
+  <p class="back"><a href="index.html">← Faceless Upload</a></p>
+  <h1>TikTok Authorization Callback</h1>
+  <p class="meta">Faceless Upload · TikTok Login Kit · redirect URI: <code>https://saifulanshor.github.io/callback.html</code></p>
+
+  <div id="status" class="box">
+    <p>Memproses redirect dari TikTok…</p>
+  </div>
+
+  <h2>What to do next / Langkah berikutnya</h2>
+  <ol>
+    <li>Salin <strong>URL lengkap dari address bar browser ini</strong> (yang berisi <code>?code=…&amp;state=…</code>).</li>
+    <li>Tempel URL itu ke prompt <code>oauth_helper.py tiktok</code> di terminal, saat diminta "paste the FULL URL you were redirected to".</li>
+    <li>Setelah itu tab ini bisa ditutup. Kode ini hanya berlaku sekali dan sebentar — jangan dibagikan ke siapa pun.</li>
+  </ol>
+
+  <h2>Privacy / Privasi</h2>
+  <p>Halaman ini hanya membaca parameter di URL di browser kamu sendiri. Kode tidak dikirim atau disimpan di mana pun oleh halaman ini.</p>
+
+  <hr>
+  <h2>Callback TikTok (ringkas)</h2>
+  <p>Halaman ini hanya dipakai sebagai tujuan redirect setelah login TikTok untuk Faceless Upload. Kalau kamu membuka halaman ini langsung tanpa login TikTok, tidak ada yang perlu dilakukan.</p>
+</main>
+<script>
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  var status = document.getElementById('status');
+  var code = params.get('code');
+  var state = params.get('state');
+  var error = params.get('error');
+  var errorDescription = params.get('error_description');
+
+  function el(tag, text) {
+    var n = document.createElement(tag);
+    n.textContent = text;
+    return n;
+  }
+  function copyButton(label, value) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = label;
+    b.addEventListener('click', function () {
+      var done = function () { b.textContent = 'Disalin ✓'; };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(value).then(done, function () { b.textContent = 'Gagal menyalin'; });
+      } else {
+        b.textContent = 'Salin manual dari address bar';
+      }
+    });
+    return b;
+  }
+
+  status.textContent = '';
+  if (error) {
+    status.classList.add('err');
+    status.appendChild(el('p', 'TikTok authorization failed / Otorisasi TikTok gagal.'));
+    status.appendChild(el('p', 'Error: ' + error));
+    if (errorDescription) status.appendChild(el('p', errorDescription));
+    status.appendChild(el('p', 'Coba login lagi dari awal. Kalau errornya berulang, periksa redirect URI yang terdaftar di TikTok Developers.'));
+  } else if (code) {
+    status.classList.add('ok');
+    status.appendChild(el('p', 'Authorization sukses. Salin URL lengkap dari address bar dan tempel ke oauth_helper.'));
+    status.appendChild(el('strong', 'code:'));
+    var codeEl = document.createElement('code');
+    codeEl.className = 'code';
+    codeEl.textContent = code;
+    status.appendChild(codeEl);
+    if (state) {
+      status.appendChild(el('strong', 'state:'));
+      var stateEl = document.createElement('code');
+      stateEl.className = 'code';
+      stateEl.textContent = state;
+      status.appendChild(stateEl);
+    }
+    status.appendChild(copyButton('Salin URL lengkap', window.location.href));
+    status.appendChild(copyButton('Salin code', code));
+  } else {
+    status.appendChild(el('p', 'Tidak ada code di URL ini. Halaman ini hanya berfungsi setelah kamu diarahkan balik dari TikTok saat login.'));
+    status.appendChild(el('p', 'Kalau kamu baru saja login dan tetap sampai di sini tanpa code, berarti redirect URI di TikTok Developers belum mengarah ke halaman ini.'));
+  }
+})();
+</script>
+</body>
+</html>
